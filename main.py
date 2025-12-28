@@ -185,19 +185,26 @@ async def main():
         else:
             await callback.answer(get_text('not_subscribed', lang), show_alert=True)
 
-    @dp.message()
-    async def menu_handler(message: types.Message):
-        user_id = message.from_user.id
-        lang = await get_user_language(user_id)
-        text = message.text
+   @dp.message()
+async def menu_handler(message: types.Message):
+    user_id = message.from_user.id
+    lang = await get_user_language(user_id)
+    text = message.text
 
-        if get_text('balance', lang) in text:
-            balance = await get_user_balance(user_id)
-            await message.answer(f"👤 {get_text('balance', lang)}: <b>{balance}</b>", parse_mode="HTML")
-        elif get_text('admin', lang) in text:
-            await message.answer("📞 Admin: +998947301030")
+    if get_text('balance', lang) in text:
+        balance = await get_user_balance(user_id)
+        await message.answer(f"👤 {get_text('balance', lang)}: <b>{balance}</b>", parse_mode="HTML")
+    elif get_text('admin', lang) in text:
+        admin_phone = os.getenv('ADMIN_PHONE', '+998947301030')  # agar envda bo‘lmasa eski raqam
+        admin_username = os.getenv('ADMIN_USERNAME', '@admin_username')  # agar envda bo‘lmasa default
+        await message.answer(
+            f"📞 Admin bilan bog‘lanish:\n"
+            f"Raqam: {admin_phone}\n"
+            f"Telegram: {admin_username}"
+        )
 
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
     asyncio.run(main())
+
