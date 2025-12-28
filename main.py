@@ -9,7 +9,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 import asyncpg
 
-# Environment variables (Render va Neon da ishlaydi)
+# Environment variables
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_USERNAME = os.getenv('BOT_USERNAME')
 CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME')
@@ -133,13 +133,11 @@ async def main():
         args = message.text.split()[1:] if len(message.text.split()) > 1 else None
         referred_by = int(args[0]) if args and args[0].isdigit() else None
         await add_or_update_user(user_id, referred_by=referred_by)
-
         lang = await get_user_language(user_id)
         if not lang:
             await message.answer(get_text('welcome', 'uz'), reply_markup=get_language_keyboard())
             await state.set_state(UserStates.choosing_language)
             return
-
         if await get_user_subscribed(user_id):
             referral_link = f"https://t.me/{BOT_USERNAME}?start={user_id}"
             await message.answer(
@@ -159,7 +157,6 @@ async def main():
         lang = callback.data.split('_')[1]
         user_id = callback.from_user.id
         await add_or_update_user(user_id, language=lang)
-
         await callback.message.edit_text(
             get_text('subscribe_prompt', lang),
             reply_markup=get_subscribe_keyboard(lang)
@@ -171,7 +168,6 @@ async def main():
     async def check_sub_callback(callback: types.CallbackQuery, state: FSMContext):
         user_id = callback.from_user.id
         lang = await get_user_language(user_id)
-
         subscribed = await is_subscribed(callback.bot, user_id)
         if subscribed:
             await update_subscription(user_id, True)
@@ -185,23 +181,23 @@ async def main():
         else:
             await callback.answer(get_text('not_subscribed', lang), show_alert=True)
 
-   @dp.message()
-async def menu_handler(message: types.Message):
-    user_id = message.from_user.id
-    lang = await get_user_language(user_id)
-    text = message.text
+    @dp.message()
+    async def menu_handler(message: types.Message):
+        user_id = message.from_user.id
+        lang = await get_user_language(user_id)
+        text = message.text
 
-    if get_text('balance', lang) in text:
-        balance = await get_user_balance(user_id)
-        await message.answer(f"👤 {get_text('balance', lang)}: <b>{balance}</b>", parse_mode="HTML")
-    elif get_text('admin', lang) in text:
-        admin_phone = os.getenv('ADMIN_PHONE', '+998947301030')  # agar envda bo‘lmasa eski raqam
-        admin_username = os.getenv('ADMIN_USERNAME', '@admin_username')  # agar envda bo‘lmasa default
-        await message.answer(
-            f"📞 Admin bilan bog‘lanish:\n"
-            f"Raqam: {admin_phone}\n"
-            f"Telegram: {admin_username}"
-        )
+        if get_text('balance', lang) in text:
+            balance = await get_user_balance(user_id)
+            await message.answer(f"👤 {get_text('balance', lang)}: <b>{balance}</b>", parse_mode="HTML")
+        elif get_text('admin', lang) in text:
+            admin_phone = os.getenv('ADMIN_PHONE', '+998947301030')
+            admin_username = os.getenv('ADMIN_USERNAME', '@admin')
+            await message.answer(
+                f"📞 Admin bilan bog‘lanish:\n"
+                f"Raqam: {admin_phone}\n"
+                f"Telegram: {admin_username}"
+            )
 
     await dp.start_polling(bot)
 
