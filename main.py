@@ -171,7 +171,7 @@ async def main():
         subscribed = await is_subscribed(callback.bot, user_id)
         if subscribed:
             await update_subscription(user_id, True)
-            referral_link = f"https://t.me/{BOT_USERNAME}?start={user_id}"
+            referral_link = f"t.me/{BOT_USERNAME}?start={user_id}"
             await callback.message.edit_text(
                 f"{get_text('subscribed', lang)}<code>{referral_link}</code>",
                 parse_mode="HTML"
@@ -203,4 +203,5 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
 
